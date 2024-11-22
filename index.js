@@ -55,7 +55,6 @@ class AlgoritmLesopilka {
 }
 
 
-
 const dataArray = [ // u250_00 150 250 99
     42, 69, 67, 57, 93, 90, 38, 36, 45, 42, 33, 79, 27, 57, 44, 84, 86, 92, 46, 
     38, 85, 33, 82, 73, 49, 70, 59, 23, 57, 72, 74, 69, 33, 42, 28, 46, 30, 64, 
@@ -90,21 +89,26 @@ const dataArray = [ // u250_00 150 250 99
   ];
   
   
-
-
 const main = () => {
-
-
-
     // const algLes = new AlgoritmLesopilka([ 6, 3, 5, 2, 2, 1.5, 7, 2, 4, 5, 6, 2, 0.5, 0.5, 1.5, 1, 0.5, 1], 10);
     // const algLes = new AlgoritmLesopilka([ 6, 3, 1, 6, 5], 10);
     // const algLes = new AlgoritmLesopilka([ 6, 3, 5, 2, 2, 1.5], 10);
-    const algLes = new AlgoritmLesopilka(dataArray, 150);
+    const algLes = new AlgoritmLesopilka(dataArray2, 150);
     algLes.fullAlg();
     console.log("count of bins " + algLes.resultList.length);
     for (let i  = 0; i < algLes.resultList.length; i++) {
         console.log(i + ": " + algLes.resultList[i]);
     }
+    console.log(algLes.resultList);
+    let arr = [];
+    for (let i = 0; i < algLes.resultList.length; i++) {
+        // console.log(algLes.resultList[i]);
+        for (let j = 0; j < algLes.resultList[i].length; j++) {
+            arr.push(algLes.resultList[i][j]);
+            // console.log(algLes.resultList[i][j]);
+        }
+    }
+    console.log(arr);
 }
 
 main();

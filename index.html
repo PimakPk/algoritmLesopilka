@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <canvas id="myChart" width="400" height="200"></canvas>
+  <script>
+    // Функция чтения JSON из файла
+    async function readJSONFromFile(filename) {
+        try {
+            const response = await fetch(filename);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const jsonData = await response.json();
+            return jsonData;
+        } catch (error) {
+            console.error('Ошибка при чтении JSON:', error);
+            return null;
+        }
+    }
+
+    (async () => {
+        // Чтение данных из JSON
+        const dataFromFile = await readJSONFromFile('./attempts/data.json');
+        if (dataFromFile) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            // Поиск минимального и максимального значений
+            const minValue = Math.min(...dataFromFile);
+            const maxValue = Math.max(...dataFromFile);
+
+            // Создаем массив цветов, где значения окрашиваются
+            const pointBackgroundColors = dataFromFile.map(value => {
+                if (value === minValue) return 'rgba(144, 238, 144, 1)'; // Салатовый для минимума
+                if (value === maxValue) return 'rgba(255, 99, 132, 1)';  // Красный для максимума
+                return 'rgba(75, 192, 192, 1)';                         // Базовый цвет для остальных
+            });
+
+            // Настройка данных для графика
+            const data = {
+                labels: Array.from({ length: dataFromFile.length }, (_, i) => i + 1), // Номера запусков
+                datasets: [{
+                    label: 'Data from JSON',
+                    data: dataFromFile,
+                    pointBackgroundColor: pointBackgroundColors, // Индивидуальная окраска точек
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Конфигурация графика
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    scales: {
+                        y: {
+                            min: minValue - minValue/50, // Минимальное значение для оси Y
+                            max: maxValue + maxValue/50, // Максимальное значение для оси Y
+                            ticks: {
+                                stepSize: (maxValue - minValue) / 5 // Настройка шага (опционально)
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    if (value === minValue) {
+                                        return `Лучший результат: ${value}`;
+                                    } else if (value === maxValue) {
+                                        return `Худший результат: ${value}`;
+                                    }
+                                    return `Результат: ${value}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Построение графика
+            new Chart(ctx, config);
+        }
+    })();
+  </script>
+</body>
+</html>
