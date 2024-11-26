@@ -5,63 +5,66 @@
 </head>
 <body>
   <canvas id="myChart" width="400" height="200"></canvas>
+  <br>
+  <canvas id="myHistogram" width="400" height="200"></canvas> <!-- Гістограма -->
+
   <script>
-    // Функция чтения JSON из файла
+    // Функція читання JSON з файлу
     async function readJSONFromFile(filename) {
         try {
             const response = await fetch(filename);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`HTTP помилка! Статус: ${response.status}`);
             }
             const jsonData = await response.json();
             return jsonData;
         } catch (error) {
-            console.error('Ошибка при чтении JSON:', error);
+            console.error('Помилка під час читання JSON:', error);
             return null;
         }
     }
 
     (async () => {
-        // Чтение данных из JSON
+        // Читання даних з JSON
         const dataFromFile = await readJSONFromFile('./attempts/data.json');
         if (dataFromFile) {
             const ctx = document.getElementById('myChart').getContext('2d');
 
-            // Поиск минимального и максимального значений
+            // Пошук мінімального та максимального значень
             const minValue = Math.min(...dataFromFile);
             const maxValue = Math.max(...dataFromFile);
 
-            // Создаем массив цветов, где значения окрашиваются
+            // Створення масиву кольорів для значень
             const pointBackgroundColors = dataFromFile.map(value => {
-                if (value === minValue) return 'rgba(144, 238, 144, 1)'; // Салатовый для минимума
-                if (value === maxValue) return 'rgba(255, 99, 132, 1)';  // Красный для максимума
-                return 'rgba(75, 192, 192, 1)';                         // Базовый цвет для остальных
+                if (value === minValue) return 'rgba(144, 238, 144, 1)'; // Салатовий для мінімуму
+                if (value === maxValue) return 'rgba(255, 99, 132, 1)';  // Червоний для максимуму
+                return 'rgba(75, 192, 192, 1)';                         // Основний колір для інших
             });
 
-            // Настройка данных для графика
+            // Налаштування даних для графіка
             const data = {
-                labels: Array.from({ length: dataFromFile.length }, (_, i) => i + 1), // Номера запусков
+                labels: Array.from({ length: dataFromFile.length }, (_, i) => i + 1), // Номери запусків
                 datasets: [{
-                    label: 'Data from JSON',
+                    label: 'Дані з JSON',
                     data: dataFromFile,
-                    pointBackgroundColor: pointBackgroundColors, // Индивидуальная окраска точек
+                    pointBackgroundColor: pointBackgroundColors, // Індивідуальне забарвлення точок
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
             };
 
-            // Конфигурация графика
+            // Конфігурація графіка
             const config = {
                 type: 'line',
                 data: data,
                 options: {
                     scales: {
                         y: {
-                            min: minValue - minValue/50, // Минимальное значение для оси Y
-                            max: maxValue + maxValue/50, // Максимальное значение для оси Y
+                            min: minValue - minValue/50, // Мінімальне значення для осі Y
+                            max: maxValue + maxValue/50, // Максимальне значення для осі Y
                             ticks: {
-                                stepSize: (maxValue - minValue) / 5 // Настройка шага (опционально)
+                                stepSize: (maxValue - minValue) / 5 // Налаштування кроку (опціонально)
                             }
                         }
                     },
@@ -71,9 +74,9 @@
                                 label: function (context) {
                                     const value = context.raw;
                                     if (value === minValue) {
-                                        return `Лучший результат: ${value}`;
+                                        return `Найкращий результат: ${value}`;
                                     } else if (value === maxValue) {
-                                        return `Худший результат: ${value}`;
+                                        return `Найгірший результат: ${value}`;
                                     }
                                     return `Результат: ${value}`;
                                 }
@@ -83,8 +86,46 @@
                 }
             };
 
-            // Построение графика
+            // Побудова графіка
             new Chart(ctx, config);
+
+            // Побудова гістограми
+            const frequency = {};
+            dataFromFile.forEach(value => {
+                frequency[value] = (frequency[value] || 0) + 1;
+            });
+
+            const histogramCtx = document.getElementById('myHistogram').getContext('2d');
+            new Chart(histogramCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(frequency), // Значення по горизонталі
+                    datasets: [{
+                        label: 'Кількість повторень',
+                        data: Object.values(frequency), // Кількість повторень
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Кількість'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Значення'
+                            }
+                        }
+                    }
+                }
+            });
         }
     })();
   </script>
