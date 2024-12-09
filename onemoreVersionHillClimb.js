@@ -20,6 +20,8 @@ function greedyBinPacking(items, binSize) {
 
 // Функция для генерации соседей
 function generateNeighbors(bins, binSize) {
+    bins = twoOpt(bins);
+    // bins = sortBinsDescending(bins);
     const neighbors = [];
     for (let i = 0; i < bins.length; i++) {
         for (let j = 0; j < bins.length; j++) {
@@ -45,6 +47,27 @@ function generateNeighbors(bins, binSize) {
 function evaluate(bins) {
     return bins.length;
 }
+
+function twoOpt(bins) {
+    let index1 = Math.floor(Math.random() * bins.length);
+    let index2 = index1;
+
+    // Убедимся, что индексы разные
+    while (index2 === index1) {
+        index2 = Math.floor(Math.random() * bins.length);
+    }
+
+    // Убедимся, что index1 < index2 для удобства
+    if (index1 > index2) {
+        [index1, index2] = [index2, index1];
+    }
+
+    // Переворачиваем подмассивы между index1 и index2
+    const newBins = [...bins.slice(0, index1), ...bins.slice(index1, index2 + 1).reverse(), ...bins.slice(index2 + 1)];
+
+    return newBins;
+}
+
 
 // Hill Climbing
 function hillClimbing(initialSolution, binSize) {
@@ -177,7 +200,7 @@ const dataArray = [ // u250_00 150 250 99
 
 // Пример использования
 // const items = [9, 9, 8, 5, 5, 5, 4, 2, 2, 1];
-const items = dataArray2;
+const items = dataArray;
 const binSize = 150;
 const iterations = 1000; // Количество запусков Hill Climbing
 
